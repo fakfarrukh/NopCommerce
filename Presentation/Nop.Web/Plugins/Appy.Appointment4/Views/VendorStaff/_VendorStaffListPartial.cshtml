@@ -1,0 +1,38 @@
+﻿
+@using Nop.Core.Domain.Customers;
+@{
+}
+
+
+@(
+Html.DevExtreme().DataGrid<Customer>()
+                .ID("gridContainerStaff").
+                DataSource(d => d.WebApi()
+                    .Controller("VendorStaff")
+                    .LoadAction("LoadStaff")
+                    .InsertAction("InsertStaff")
+                    .UpdateAction("UpdateStaff")
+                    .DeleteAction("DeleteStaff")
+                    .Key("Id")
+                )
+                .ShowBorders(true)
+                .Paging(paging => paging.Enabled(false))
+                .Editing(editing =>
+                {
+                    editing.Mode(GridEditMode.Row);
+                    editing.AllowAdding(false);
+                    editing.AllowDeleting(true);
+                    editing.AllowUpdating(false);
+                })
+                .Columns(columns =>
+                {
+                    columns.AddFor(m => m.Email).Caption("Staff Email");
+                    columns.AddFor(m => m.SystemName).Caption("Name");
+                    columns.AddFor(m => m.Active);
+                }).Selection(x => x.Mode(SelectionMode.Single)).OnSelectionChanged("selection_changed")
+)
+<script>
+    function SaveLanguage(data) {
+        console.log(da5a);
+    }
+</script>

@@ -1,0 +1,40 @@
+﻿@model Nop.Web.Areas.Admin.Models.Catalog.ProductModel
+@{
+}
+
+
+@(
+Html.DevExtreme().DataGrid<Nop.Plugin.Appy.Appointment4.Domain.aaProductLanguage>()
+                .ID("gridContainerLanguage").
+                DataSource(d => d.Mvc()
+                    .Controller("Appointment")
+                    .LoadAction("LoadLanguages").LoadParams(new { id = Model.Id })
+                    .InsertAction("InsertLanguages")
+                    .UpdateAction("UpdateLanguages")
+                    .DeleteAction("DeleteLanguages")
+                    .Key("Id")
+                )
+                .ShowBorders(true)
+                .Paging(paging => paging.Enabled(false))
+                .Editing(editing =>
+                {
+                    editing.Mode(GridEditMode.Row);
+                    editing.AllowAdding(true);
+                    editing.AllowDeleting(true);
+                    editing.AllowUpdating(true);
+                })
+                .Columns(columns =>
+                {
+                    columns.AddFor(m => m.Language).Caption("Spoken Language");
+                }).OnRowInserting("AddLanguage")
+)
+<script>
+        function AddLanguage(e) {
+            debugger;
+            console.log(e);
+
+            var data = e.data;
+            data.ProductId = $("#ProductId").val();
+
+        }
+</script>

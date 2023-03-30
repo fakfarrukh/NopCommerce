@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Misc.AppyTwoAppointment",
+  "SystemName": "Misc.AppyTwoAppointment",
+  "Version": "1.71",
+  "SupportedVersions": [ "4.50" ],
+  "Author": "nopCommerce team",
+  "DisplayOrder": 0,
+  "FileName": "Nop.Plugin.Misc.AppyTwoAppointment.dll",
+  "Description": "This plugin allows Misc.AppyTwoAppointment"
+}

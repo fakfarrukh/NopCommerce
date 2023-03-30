@@ -1,0 +1,48 @@
+﻿@{
+    Layout = "~/Plugins/Misc.AppyTwoAppointment/Views/Shared/_DevExtremeLayout.cshtml";
+}
+@using DevExtreme.AspNet.Mvc
+@using Nop.Plugin.Misc.AppyTwoAppointment.Models.AppyAppointmentModel;
+@model List<InsuranceCompany>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+
+@(Html.DevExtreme().DataGrid<InsuranceCompany>()
+    .ID("gridContainer")
+    .ShowBorders(true)
+    .Paging(paging => paging.Enabled(false))
+    .Editing(editing =>
+    {
+        editing.Mode(GridEditMode.Row);
+        editing.AllowAdding(true);
+        editing.AllowDeleting(true);
+        editing.AllowUpdating(true);
+        editing.UseIcons(true);
+    })
+    .Columns(columns =>
+        {
+
+
+
+            columns.AddFor(m => m.AName).Caption("Arabic Name");
+            columns.AddFor(m => m.EName).Caption("English Name");
+
+
+        })
+
+     .DataSource(d => d.Mvc()
+        .Controller("InsuranceCompany")
+        .LoadAction("GetInsuranceCompany")
+        .UpdateAction("Put")
+        .InsertAction("Post")
+        .DeleteAction("Delete")
+        .Key("Id")
+
+    )
+
+)
+
+

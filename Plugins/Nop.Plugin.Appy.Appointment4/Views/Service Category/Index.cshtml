@@ -1,0 +1,44 @@
+﻿@model Nop.Web.Areas.Admin.Models.Catalog.ProductModel
+@{
+    Layout = "~/Plugins/Appy.Appointment4/Views/Shared/_PluginLayout.cshtml";
+}
+
+@(
+Html.DevExtreme().DataGrid<Nop.Plugin.Appy.Appointment4.Domain.aaServiceCatagory>()
+    .ID("gridContainerServiceCategory").
+    DataSource(d => d.WebApi()
+                    .Controller("ServiceCategory")
+                    .LoadAction("aaLoadServiceCategory")
+                    .InsertAction("aaInsertServiceCategory")
+                    .UpdateAction("aaUpdateServiceCategory")
+                    .DeleteAction("aaDeleteServiceCategory")
+                    .Key("Id")
+                )
+    .ShowBorders(true)
+    .Paging(paging => paging.Enabled(false))
+    .Editing(editing =>
+    {
+        editing.Mode(GridEditMode.Row);
+        editing.AllowAdding(true);
+        editing.AllowDeleting(true);
+        editing.AllowUpdating(true);
+    })
+    .Columns(columns =>
+    {
+        columns.AddFor(m => m.ServiceCategory).Caption("Services");
+        columns.AddFor(m => m.ArabicName).Caption("Arabic Name").Alignment(HorizontalAlignment.Right);
+
+
+    })
+)
+
+<script>
+    function AddServiceCategory(e) {
+        debugger;
+        console.log(e);
+
+        var data = e.data;
+        data.ProductId = $("#ProductId").val();
+
+    }
+</script>

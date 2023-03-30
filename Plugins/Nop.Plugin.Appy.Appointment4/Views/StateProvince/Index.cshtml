@@ -1,0 +1,307 @@
+﻿@model Nop.Plugin.Appy.Appointment4.Models.StateProvince
+@using Nop.Core.Domain.Customers;
+@{
+    Layout = "~/Plugins/Appy.Appointment4/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .row {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: calc(-1 * var(--bs-gutter-y));
+        margin-right: calc(-0.5 * var(--bs-gutter-x));
+        margin-left: calc(-0.5 * var(--bs-gutter-x));
+    }
+
+    .col {
+        flex: 1 0 0%;
+        position: relative;
+        width: 100%;
+        min-height: 1px;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+
+    .btn-appointment {
+        background-color: #5cb85c !important;
+        border-color: transparent !important;
+        color: #fff !important;
+    }
+</style>
+<div class="row">
+    <div class="col">
+        <div class="dx-field">
+            <div class="dx-field-label">Select Country</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().SelectBox().DataSource(d => d.Mvc().LoadAction("GetCountries")).DisplayExpr("Name")
+                    .Placeholder("Choose Country").Name("countries").OnValueChanged("country_valueChanged")
+                    .ShowClearButton(true)
+                    )
+            </div>
+        </div>
+    </div>
+    <div class="col">
+    </div>
+</div>
+<br />
+
+<div class="row">
+    <div class="col" id="stateProvienceLoad">
+        <div class="dx-field">
+            <div class="dx-field-value">
+                @(
+                    Html.DevExtreme().Button()
+                    .Text("Add New State")
+                    .Type(ButtonType.Normal)
+                    .StylingMode(ButtonStylingMode.Text).UseSubmitBehavior(true)
+                    .Width(170).ElementAttr("class", "btn-appointment  dx-button-success").OnClick("addnewState")
+                    )
+            </div>
+        </div>
+        @(
+            Html.DevExtreme().DataGrid<Nop.Core.Domain.Directory.StateProvince>()
+            .ID("gridContainerState")
+            .ShowBorders(true)
+            .Paging(paging => paging.Enabled(false))
+            .Editing(editing =>
+            {
+                editing.Mode(GridEditMode.Row);
+                editing.AllowAdding(false);
+                editing.AllowDeleting(true);
+                editing.AllowUpdating(false);
+
+            })
+            .Columns(columns =>
+            {
+                columns.AddFor(m => m.Name).Caption("State/Provience");
+                columns.AddFor(m => m.Id).Visible(false);
+            }).Selection(x => x.Mode(SelectionMode.Single)).OnSelectionChanged("selection_changed")
+            )
+    </div>
+    <div class="col">
+        @(Html.DevExtreme().Form<Nop.Plugin.Appy.Appointment4.Models.StateProvince>()
+            .ShowValidationSummary(true)
+            .Items(items =>
+            {
+
+                items.AddGroup()
+                .Caption("Edit State/Provience")
+                .Items(groupItems =>
+                {
+                    groupItems.AddSimpleFor(m => m.CountryId).Editor(e => e.SelectBox().DataSource(d => d.Mvc().LoadAction("GetCountries").LoadMode(DataSourceLoadMode.Raw)).DisplayExpr("Name").ValueExpr("Id")
+                .Placeholder("Choose Country").Name("editcountries").ID("ddlCountries").ShowClearButton(true).Label("Select Country"));
+                    groupItems.AddSimpleFor(m => m.Name).Name("StateName");
+
+                    groupItems.AddSimpleFor(m => m.Abbreviation).Name("StateAbbreviation");
+
+                    groupItems.AddSimpleFor(m => m.ArabicName).Name("StateArabicName");
+
+                    groupItems.AddSimpleFor(m => m.IsPublished).Name("StatePublished")
+                .Editor(e => e.CheckBox().ID("chkIsPublished"));
+                    groupItems.AddSimpleFor(m => m.DisplayOrder).Name("StateDisplayOrder")
+                .Editor(e => e.NumberBox().Name("DisplayOrder").ID("txtdisplayOrder"));
+                });
+                items.AddButton()
+                .HorizontalAlignment(HorizontalAlignment.Left)
+                .ButtonOptions(b => b.Text("Save")
+                .Type(ButtonType.Success)
+                .UseSubmitBehavior(false).OnClick("addupdateState")
+                );
+            })
+            .FormData(Model)
+            )
+    </div>
+    <input type="hidden" id="StateId" value="" />
+    <input type="hidden" id="MainCountryId" value="" />
+</div>
+@(Html.DevExtreme().LoadPanel()
+        .ID("loadPanel")
+        .ShadingColor("rgba(0,0,0,0.4)")
+        .Position(p => p.Of("#employee"))
+        .Visible(false)
+        .ShowIndicator(true)
+        .ShowPane(true)
+        .Shading(true)
+        .HideOnOutsideClick(false)
+    )
+<script>
+    function addnewState() {
+        $("#StateId").val("0");
+        $("input[name=Name]").val("")
+        $("input[name=Abbreviation]").val("")
+        $("input[name=ArabicName]").val("")
+        $("input[name=Published]").val("")
+        $("input[name=DisplayOrder]").val("")
+        $("input[name=editcountries]").val("")
+        let element = document.getElementById("ddlCountries");
+        var e = DevExpress.ui.dxSelectBox.getInstance(element)
+        e.option('value', 0);
+
+        let displayelement = document.getElementById("txtdisplayOrder");
+        var eDisplay = DevExpress.ui.dxNumberBox.getInstance(displayelement)
+        eDisplay.option('value', 0);
+
+        let Publishedelement = document.getElementById("chkIsPublished");
+        var ePublished = DevExpress.ui.dxCheckBox.getInstance(Publishedelement)
+        ePublished.option('value', false);
+    }
+    function countries_valueChanged(data) {
+        console.log(data);
+    }
+    function country_valueChanged(data) {
+        console.log(data.value.Id);
+        $("#MainCountryId").val(data.value.Id);
+        LoadStateByCountry(data.value.Id)
+    }
+    function LoadStateByCountry(Id) {
+        console.log(Id);
+        $.ajax({
+            url: '/StateProvince/GetStateProvience/',
+            type: "post",
+            data: { CountryId: JSON.stringify(Id) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    let element = document.getElementById("gridContainerState");
+                    console.log(element);
+                    let instance = DevExpress.ui.dxDataGrid.getInstance(element);
+                    instance.option("dataSource", res)
+                    console.log(instance);
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+
+    function selection_changed(selectedItems) {
+        var data = selectedItems.selectedRowsData[0];
+        console.log(data);
+        if (data) {
+            $.ajax({
+                url: '/StateProvince/LoadStateProvincebyId/',
+                type: "post",
+                data: { Id: JSON.stringify(data.Id) },
+                success: function (res) {
+                    console.log(res);
+                    if (res) {
+                        $("#StateId").val(res.stateProvience.Id);
+                        $("input[name=Name]").val(res.stateProvience.Name)
+                        $("input[name=Abbreviation]").val(res.stateProvience.Abbreviation)
+                        $("input[name=ArabicName]").val(res.ArabicName)
+                        $("input[name=Published]").val(res.stateProvience.Published)
+                        $("input[name=DisplayOrder]").val(res.stateProvience.DisplayOrder)
+                        $("input[name=editcountries]").val(res.stateProvience.CountryId)
+                        console.log(res.stateProvience.CountryId);
+                        let displayelement = document.getElementById("txtdisplayOrder");
+                        var eDisplay = DevExpress.ui.dxNumberBox.getInstance(displayelement)
+                        eDisplay.option('value', res.stateProvience.DisplayOrder);
+
+                        let Publishedelement = document.getElementById("chkIsPublished");
+                        var ePublished = DevExpress.ui.dxCheckBox.getInstance(Publishedelement)
+                        ePublished.option('value', res.stateProvience.Published);
+
+                        let element = document.getElementById("ddlCountries");
+                        var e = DevExpress.ui.dxSelectBox.getInstance(element)
+                        e.option('value', res.stateProvience.CountryId);
+                    }
+                    else {
+                        DevExpress.ui.notify(
+                            {
+                                message: "An Error has occurred",
+                                position: {
+                                    my: "center top",
+                                    at: "center top",
+                                },
+                            },
+                            "error",
+                            3500
+                        );
+                    }
+
+                },
+            });
+        }
+    }
+
+    function addupdateState(e) {
+        var stateProvienceData = {
+            Name: $("input[name=Name]").val(),
+            Abbreviation: $("input[name=Abbreviation]").val(), ArabicName: $("input[name=ArabicName]").val(), Published: $("input[name=Published]").val(), DisplayOrder: $("input[name=DisplayOrder]").val(),
+            Id: $("#StateId").val(), CountryId: $("input[name=editcountries]").val()
+        }
+        if (stateProvienceData.Id == null || stateProvienceData.Id == "" || stateProvienceData.Id == undefined) {
+            stateProvienceData.Id = 0;
+        }
+        console.log(stateProvienceData);
+        $.ajax({
+            url: '/StateProvince/SaveStateProvince/',
+            type: "post",
+            data: { stateProvinceValues: JSON.stringify(stateProvienceData) },
+            success: function (res) {
+                if (res == "Success") {
+                    var countryId = parseInt($("#MainCountryId").val());
+                    LoadStateByCountry(countryId);
+                    $("#StateId").val("0");
+                    $("input[name=Name]").val("")
+                    $("input[name=Abbreviation]").val("")
+                    $("input[name=ArabicName]").val("")
+                    $("input[name=Published]").val("")
+                    $("input[name=DisplayOrder]").val("")
+                    $("input[name=editcountries]").val("")
+                    let element = document.getElementById("ddlCountries");
+                    var e = DevExpress.ui.dxSelectBox.getInstance(element)
+                    e.option('value', -1);
+
+                    let displayelement = document.getElementById("txtdisplayOrder");
+                    var eDisplay = DevExpress.ui.dxNumberBox.getInstance(displayelement)
+                    eDisplay.option('value', 0);
+
+                    let Publishedelement = document.getElementById("chkIsPublished");
+                    var ePublished = DevExpress.ui.dxCheckBox.getInstance(Publishedelement)
+                    ePublished.option('value', false);
+                    DevExpress.ui.notify(
+                        {
+                            message: "Record Save successfully",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "success",
+                        3500
+                    );
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+
+</script>
+

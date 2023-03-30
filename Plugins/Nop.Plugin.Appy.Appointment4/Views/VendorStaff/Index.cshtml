@@ -1,0 +1,273 @@
+﻿@model Nop.Plugin.Appy.Appointment4.Models.VendorStaff
+
+@{
+    Layout = "~/Plugins/Appy.Appointment4/Views/Shared/_PluginLayout.cshtml";
+}
+<style>
+    .dx-checkbox-app {
+        float: left !important;
+    }
+
+    .btn-appointment {
+        background-color: #5cb85c !important;
+        border-color: transparent !important;
+        color: #fff !important;
+    }
+
+    .options {
+        padding: 20px;
+        background-color: rgba(191, 191, 191, 0.15);
+    }
+</style>
+
+@(Html.DevExtreme().Form<Nop.Plugin.Appy.Appointment4.Models.VendorStaff>()
+    .FormData(Model)
+    .Items(items =>
+    {
+        items.AddGroup()
+            .Caption("Vendor Details")
+            .ColCount(2)
+            .Items(groupItems =>
+            {
+
+                groupItems.AddSimple()
+                    .Editor(e => e
+                        .SelectBox()
+                        .DataSource(Model.vendors)
+                        .DisplayExpr("Name")
+                        .Placeholder("Choose Vendors")
+                        .SearchEnabled(true)
+                        .OnValueChanged("onVendorValue_Changed")
+                    );
+                groupItems.AddSimple()
+                                    .Editor(e => e
+                                        .SelectBox()
+                                        .DisplayExpr("Name")
+                                        .Placeholder("Choose Clinic")
+                                        .SearchEnabled(true)
+                                        .ID("SelectBoxClinic")
+                                    );
+
+            });
+    })
+)
+@await Html.PartialAsync("~/Plugins/Appy.Appointment4/Views/VendorStaff/_VendorStaffListPartial.cshtml")
+<br />
+<div id="form">
+    <div class="options">
+        <div class="dx-fieldset">
+            <div class="dx-field">
+                <div class="dx-field-value">
+                    @(
+                        Html.DevExtreme().Button()
+                        .Text("Add new Customer")
+                        .Type(ButtonType.Normal)
+                        .StylingMode(ButtonStylingMode.Text).UseSubmitBehavior(false).OnClick("AddCustomer")
+                        .Width(200).ElementAttr("class", "btn-appointment  dx-button-success")
+                        )
+                </div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-label">Vendor</div>
+                <div class="dx-field-value">
+                    @(Html.DevExtreme().SelectBox()
+                        .DataSource(Model.vendors).DisplayExpr("Name").ValueExpr("Id").ID("selectVendor"))
+                </div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-label">Email</div>
+                <div class="dx-field-value">
+                    @(Html.DevExtreme().TextBox().Name("CustomerEmail"))
+                </div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-label">First Name</div>
+                <div class="dx-field-value">
+                    @(Html.DevExtreme().TextBox().Name("CustomerFirstName"))
+                </div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-label">Last Name</div>
+                <div class="dx-field-value">
+                    @(Html.DevExtreme().TextBox().Name("CustomerLastName"))
+                </div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-value">
+                    @(
+                        Html.DevExtreme().CheckBox()
+                        .Text("Active").ElementAttr("class", "dx-checkbox-app").ID("CustomerActive").Name("CustomerActiveName")
+                        )
+                </div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-value">
+                    @(
+                        Html.DevExtreme().Button()
+                        .Text("Save")
+                        .Type(ButtonType.Normal)
+                        .StylingMode(ButtonStylingMode.Text).UseSubmitBehavior(false).OnClick("SaveCustomer").ID("btnCustomer")
+                        .Width(200).ElementAttr("class", "btn-appointment  dx-button-success")
+                        )
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" Id="StaffID" value="0" />
+</div>
+<script>
+    function onVendorValue_Changed(e) {
+        console.log(e);
+        var Id = e.value.Id;
+        LoadStateByCountry(Id);
+        $.ajax({
+            url: '/VendorStaff/LoadClinics/',
+            type: "get",
+            data: { Id: JSON.stringify(Id) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    let element = document.getElementById("SelectBoxClinic");
+                    console.log(element);
+                    let instance = DevExpress.ui.dxSelectBox.getInstance(element);
+                    instance.option("dataSource", res)
+                    console.log(instance);
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+    function LoadStateByCountry(Id) {
+        console.log(Id);
+        $.ajax({
+            url: '/VendorStaff/LoadCustomer/',
+            type: "get",
+            data: { Id: JSON.stringify(Id) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    let element = document.getElementById("gridContainerStaff");
+                    console.log(res);
+                    let instance = DevExpress.ui.dxDataGrid.getInstance(element);
+                    console.log(instance);
+                    if (res && res.length > 0) {
+                        instance.option("dataSource", res)
+                    }
+                    else {
+                        instance.option("dataSource", [])
+                    }
+
+                    console.log(instance);
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+
+    function selection_changed(selectedItems) {
+        console.log(selectedItems);
+        var data = selectedItems.selectedRowsData[0];
+        let elementbtn = document.getElementById("btnCustomer");
+        var ebtn = DevExpress.ui.dxButton.getInstance(elementbtn)
+        ebtn.option('text', "Update");
+
+        $("#StaffID").val(data.Id);
+        $("input[name=CustomerEmail]").val(data.Email)
+        var split = data.SystemName.split(" ");
+        //console.log(split);
+        $("input[name=CustomerFirstName]").val(split != null && split.length > 0 ? split[0] : "")
+        $("input[name=CustomerLastName]").val(split != null && split.length > 0 ? split[1] : "")
+        let element = document.getElementById("selectVendor");
+        var e = DevExpress.ui.dxSelectBox.getInstance(element)
+        e.option('value', data.VendorId);
+
+        let CustomerActiveelement = document.getElementById("CustomerActive");
+        var CustomerActivee = DevExpress.ui.dxCheckBox.getInstance(CustomerActiveelement)
+        CustomerActivee.option('value', data.Active);
+
+    }
+
+    function SaveCustomer() {
+        let element = document.getElementById("selectVendor");
+        var e = DevExpress.ui.dxSelectBox.getInstance(element)
+        e.option('value');
+        var vendor = {
+            VendorId: e.option('value'), CustomerFirstName: $("input[name=CustomerFirstName]").val(), Email: $("input[name=CustomerEmail]").val(),
+            CustomerLastName: $("input[name=CustomerLastName]").val(), Id: $("#StaffID").val(), Active: $("input[name=CustomerActiveName]").val(),
+        }
+        $.ajax({
+            url: '/VendorStaff/SaveCustomer/',
+            type: "post",
+            data: { values: JSON.stringify(vendor) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    LoadStateByCountry(vendor.VendorId)
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+
+    }
+
+    function AddCustomer() {
+        let elementbtn = document.getElementById("btnCustomer");
+        var ebtn = DevExpress.ui.dxButton.getInstance(elementbtn)
+        ebtn.option('text', "Save");
+        $("#StaffID").val("0");
+        $("input[name=CustomerEmail]").val("")
+        $("input[name=CustomerFirstName]").val("")
+        $("input[name=CustomerLastName]").val("")
+        let element = document.getElementById("selectVendor");
+        var e = DevExpress.ui.dxSelectBox.getInstance(element)
+        e.option('value', -1);
+
+
+        let CustomerActiveelement = document.getElementById("CustomerActiveCustomerActive");
+        var CustomerActivee = DevExpress.ui.dxCheckBox.getInstance(CustomerActiveelement)
+        CustomerActivee.option('value', true);
+    }
+</script>
+
+
+
+

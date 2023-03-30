@@ -1,0 +1,58 @@
+﻿@using Nop.Web.Framework.UI;
+@inject INopHtmlHelper NopHtml
+
+
+@* <script src="~/Plugins/Misc.Appointment/script/dx.all.js"></script>
+    <script src="~/Plugins/Misc.Appointment/script/dx.aspnet.data.js"></script> *@
+    <link rel="stylesheet" href="~/Plugins/Misc.Appointment/Content/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/22.1.6/css/dx.light.css" />
+<!-- DevExtreme library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/devextreme/22.1.6/js/dx.all.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js"></script>
+
+
+<!-- DevExpress.AspNet.Data -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/devextreme-aspnet-data/2.8.6/dx.aspnet.data.min.js"></script>
+
+
+@{ 
+    NopHtml.AddScriptParts(ResourceLocation.Footer, "~/Plugins/Misc.Appointment/Scripts/dx.aspnet.mvc.js", "",true);
+  
+    NopHtml.AddCssFileParts("~/Plugins/Misc.Appointment/Content/css/bootstrap.min.css", "~/Plugins/Misc.Appointment/Content/css/bootstrap.min.css", true);
+      NopHtml.AddScriptParts(ResourceLocation.Footer, "~/Plugins/Misc.Appointment/Scripts/Secretary/Appointment/SecretaryAppointment.js", "",true);
+    
+    NopHtml.AddScriptParts(ResourceLocation.Footer, "~/Plugins/Misc.Appointment/Scripts/Secretary/SecretaryLayout.js", "",true);
+    NopHtml.AddScriptParts(ResourceLocation.Footer, "~/Plugins/Misc.Appointment/Scripts/Secretary/SecretaryLocation.js", "",true);
+    NopHtml.AddScriptParts(ResourceLocation.Footer,    "~/Plugins/Misc.Appointment/Scripts/Secretary/SecretaryStaff.js", "",true);
+
+}
+<style>input[type="text"], input[type="email"], input[type="tel"], input[type="password"], textarea, select {
+    height: 36px;
+     border: 0px solid #ddd!important; 
+    padding: 8px;
+    vertical-align: middle;
+}
+.options {
+  padding: 20px;
+  background-color: rgba(191, 191, 191, 0.15);
+  margin-top: 20px;
+}
+
+.caption {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.option {
+  margin-top: 10px;
+  display: inline-block;
+}</style>
+
+    <script type="text/html" id="AccordionTemplateTitle">
+        <h5><%=Title  %></h5>
+    
+    </script>
+     <script type="text/html" id="AccordionTemplate">
+        <div id="AccordionContent"></div>
+    
+    </script>

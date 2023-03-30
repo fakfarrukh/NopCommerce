@@ -1,0 +1,93 @@
+@model Nop.Web.Areas.Admin.Models.Directory.CountryModel
+@using Nop.Web.Areas.Admin.Models.Directory
+@using Nop.Web.Framework.Models.DataTables
+@using Nop.Web.Framework.Mvc.Razor
+@using Nop.Web.Framework.Localization
+@using Microsoft.AspNetCore.Routing
+
+@if (Model.Id > 0)
+{
+    <div class="card-body">
+        @await Html.PartialAsync("Table", new DataTablesModel
+        {
+            Name = "states-grid",
+            UrlRead = new DataUrl("aaStates", "Country", new RouteValueDictionary { [nameof(StateProvinceSearchModel.CountryId)] = Model.StateProvinceSearchModel.CountryId }),
+            UrlDelete = new DataUrl("aaStateDelete", "Country", null),
+            Length = Model.StateProvinceSearchModel.PageSize,
+            LengthMenu = Model.StateProvinceSearchModel.AvailablePageSizes,
+            ColumnCollection = new List<ColumnProperty>
+            {
+    new ColumnProperty(nameof(aaStateProvinceModel.Name))
+                {
+    Title = "Name",
+                    Width = "300"
+                },
+    new ColumnProperty(nameof(aaStateProvinceModel.Published))
+                {
+    Title = "Published",
+                    Width = "100",
+                    ClassName = NopColumnClassDefaults.CenterAll,
+                    Render = new RenderBoolean()
+                },
+    new ColumnProperty(nameof(aaStateProvinceModel.ArabicName))
+    {
+    Title = "Arabic",
+    Width = "100",
+    },
+    new ColumnProperty(nameof(aaStateProvinceModel.DisplayOrder))
+                {
+    Title = "Display Order",
+                    Width = "100",
+                    ClassName =  NopColumnClassDefaults.CenterAll
+                },
+    new ColumnProperty(nameof(aaStateProvinceModel.Id))
+                {
+                    Title = "Edit",
+                    Width = "100",
+                    ClassName = NopColumnClassDefaults.Button,
+                    Render = new RenderCustom("renderColumnEdit")
+                },
+    new ColumnProperty(nameof(aaStateProvinceModel.Id))
+                {
+    Title = "Delete",
+                    Width = "100",
+                    Render = new RenderButtonRemove("Delete"),
+                    ClassName = NopColumnClassDefaults.Button
+                }
+            }
+        })
+    </div>
+    <div class="card-footer">
+        <div width="100%">
+            <button type="submit" id="btnAddNewState"
+                    onclick="javascript:OpenWindow('@(Url.Action("aaStateCreatePopup", "Country", new { countryId = Model.Id, btnId = "btnRefresh", formId = "country-form" }))', 800, 450, true); return false;"
+                    class="btn btn-primary">
+                AddNew
+            </button>
+            <button type="submit" id="btnRefresh" style="display: none"></button>
+            <script>
+                $(document).ready(function () {
+                    $('#btnRefresh').click(function () {
+                        //refresh grid
+                        updateTable('#states-grid');
+
+                        //return false to don't reload a page
+                        return false;
+                    });
+                });
+            </script>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card-body">
+        SaveBeforeEdit
+    </div>
+}
+
+<script>
+    function renderColumnEdit(data, type, row, meta) {
+        return '<button onclick=\"javascript:OpenWindow(\'@Url.Content("~/Admin/Country/aaStateEditPopup/")' + data + '?btnId=btnRefresh&formId=country-form\', 800, 400, true); return false;\" class="btn btn-default"><i class="fas fa-pencil-alt"></i>Edit</button>';
+    }
+</script>

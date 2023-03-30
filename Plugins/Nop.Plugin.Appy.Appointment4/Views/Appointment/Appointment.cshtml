@@ -1,0 +1,195 @@
+﻿@model Nop.Web.Areas.Admin.Models.Catalog.ProductModel
+@using Nop_Plugin_Appy_Appointment4.Models
+
+@{
+    Layout = "~/Plugins/Appy.Appointment4/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .dx-checkbox-app {
+        float: left !important;
+    }
+
+    .btn-appointment {
+        background-color: #5cb85c !important;
+        border-color: transparent !important;
+        color: #fff !important;
+    }
+</style>
+
+<div class="form">
+    <div>
+    </div>
+    <div class="dx-fieldset">
+        <div class="dx-field">
+            <div class="dx-field-label">Booking Period</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().SelectBox()
+                    .Placeholder("Choose Booking Periods")
+                    .DataSource(d => d.Mvc().LoadAction("LoadBookingDropdown").RouteName("Plugin.Appointment4.BookingRange").LoadMode(DataSourceLoadMode.Raw))
+                    .ShowClearButton(true).ID("selectbookingPeriods").Name("BookingPeriods").Value(Model.BookingPeriods)
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-label">Time Block</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().NumberBox().ID("timeBlock").Name("BookingTimeBlock").Value(!string.IsNullOrEmpty(Model.BookingTimeBlock) ? double.Parse(Model.BookingTimeBlock) : 0))
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-value">
+                @(
+                    Html.DevExtreme().CheckBox()
+                    .Value(Model.Cancelable)
+                    .Text("Cancelable").ElementAttr("class", "dx-checkbox-app").Name("Cancelable")
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-value">
+                @(Html.DevExtreme().CheckBox()
+                    .Value(Model.ConfirmationNeeded)
+                    .Text("Confirmation Needed").ElementAttr("class", "dx-checkbox-app").Name("ConfirmationNeeded").ID("chkConfirmation")
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-label">Booking open no sooner than</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().NumberBox().ID("bookingSooner").Name("BookingOpenSooner").Value(!string.IsNullOrEmpty(Model.BookingOpenSooner) ?  double.Parse(Model.BookingOpenSooner) : 0)
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-label">Booking open no later than</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().NumberBox().ID("bookingLater").Name("BookingOpenLater").Value(!string.IsNullOrEmpty(Model.BookingOpenLater) ?  double.Parse(Model.BookingOpenLater) : 0))
+            </div>
+        </div>
+        @await Html.PartialAsync("~/Plugins/Appy.Appointment4/Views/Appointment/_BookingRangePartial.cshtml",Model)
+        <br />
+        <div class="dx-field">
+            <div class="dx-field-label">Select Gender</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().SelectBox()
+                    .Placeholder("Choose Gender")
+                    .DataSource(d => d.Mvc().LoadAction("LoadGenderDropdown").RouteName("Plugin.Appointment4.Gender").LoadMode(DataSourceLoadMode.Raw))
+                    .ShowClearButton(true).Name("Gender").Value(Model.Gender)
+
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-label">Select Nationality</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().SelectBox()
+                    .DataSource(d => d.Mvc().LoadAction("LoadNationlityDropdown").RouteName("Plugin.Appointment4.Nationality").LoadMode(DataSourceLoadMode.Raw)).DisplayExpr("Name").ValueExpr("Name")
+                    .Placeholder("Choose Nationality").Name("Nationality").Value(Model.Nationality)
+                    .ShowClearButton(true)
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-value">
+                @(
+                    Html.DevExtreme().CheckBox()
+                    .Text("Home Visit").ElementAttr("class", "dx-checkbox-app").Name("HomeVisit").Value(Model.HomeVisit)
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-value">
+                @(Html.DevExtreme().CheckBox()
+                    .Text("Phone Call").ElementAttr("class", "dx-checkbox-app").Name("PhoneCall").Value(Model.PhoneCall)
+                    )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-value">
+                @(Html.DevExtreme().CheckBox()
+                    .Text("Virtual Conference").ElementAttr("class", "dx-checkbox-app").Name("VirtualConf").Value(Model.VirtualConf)
+                    )
+            </div>
+        </div>
+        @await Html.PartialAsync("~/Plugins/Appy.Appointment4/Views/Appointment/_AppointmentLanguagePartial.cshtml",Model)
+        @await Html.PartialAsync("~/Plugins/Appy.Appointment4/Views/Appointment/_AppointmentServiceCategoryPartial.cshtml",Model)
+    </div>
+    <input type="hidden" id="SelectedPeriodValue" value="" />
+    <input type="hidden" id="ProductId" value="@Model.Id" />
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        var productId = 0;
+        if (productId > 0) {
+            $.ajax({
+                url: '/Appointment/LoadAppointment/',
+                type: "post",
+                data: { Id: JSON.stringify(productId) },
+                success: function (res) {
+                    if (res == "Success") {
+
+                    }
+                    else {
+                        DevExpress.ui.notify(
+                            {
+                                message: "An Error has occurred",
+                                position: {
+                                    my: "center top",
+                                    at: "center top",
+                                },
+                            },
+                            "error",
+                            3500
+                        );
+                    }
+
+                },
+            });
+        }
+    })
+    function addupdateproduct(e) {
+        var appointmentData = {
+            BookingPeriod: $("#BookingPeriods").val(), BookingTimeBlock: $("input[name=BookingTimeBlock]").val(),
+            Cancelable: $("input[name=Cancelable]").val(), ConfirmationNeeded: $("input[name=ConfirmationNeeded]").val(), BookingOpenSooner: $("input[name=BookingOpenSooner]").val(), BookingOpenLater: $("input[name=BookingOpenLater]").val(), ProductId
+                : $("#ProductId").val(), Gender: $("input[name=Gender]").val(), Nationality: $("input[name=Nationality]").val(), VirtualConference: $("input[name=VirtualConf]").val(), PhoneCall: $("input[name=PhoneCall]").val(), HomeVisit: $("input[name=HomeVisit]").val()
+        }
+        console.log(appointmentData);
+        $.ajax({
+            url: '/Appointment/SaveAppointment/',
+            type: "post",
+            data: { appointmentvalues: JSON.stringify(appointmentData) },
+            success: function (res) {
+                if (res == "Success") {
+                    DevExpress.ui.notify(
+                        {
+                            message: "Appointment Save successfully",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "success",
+                        3500
+                    );
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+</script>

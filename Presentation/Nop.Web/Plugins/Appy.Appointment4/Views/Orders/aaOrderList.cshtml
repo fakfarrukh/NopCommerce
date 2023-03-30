@@ -1,0 +1,137 @@
+﻿@using Nop.Web.Framework.Models.DataTables;
+@using Nop.Services.Common;
+@using Nop.Web.Areas.Admin.Models.Orders;
+@inject IStoreService storeService;
+@using Nop.Services.Stores;
+
+
+
+    <div class="card-body">
+        <nop-doc-reference asp-string-resource="Orders", Docs.Orders + Utm.OnAdmin)" />
+
+        @{
+            var gridModel = new DataTablesModel
+            {
+                Name = "orders-grid",
+                UrlRead = new DataUrl("aaOrderDetails", "OrderAppointment", null),
+                SearchButtonId = "search-orders",
+                Length = Model.PageSize,
+                LengthMenu = Model.AvailablePageSizes,
+                FooterCallback = !Model.IsLoggedInAsVendor ? "ordersfootercallback" : null,
+                FooterColumns = !Model.IsLoggedInAsVendor ? 10 : 0,
+                Filters = new List<FilterParameter>
+        {
+        new FilterParameter(nameof(Model.StartDate), typeof(DateTime?)),
+        new FilterParameter(nameof(Model.EndDate), typeof(DateTime?)),
+        new FilterParameter(nameof(Model.OrderStatusIds)),
+        new FilterParameter(nameof(Model.PaymentStatusIds)),
+        new FilterParameter(nameof(Model.ShippingStatusIds)),
+        new FilterParameter(nameof(Model.StoreId)),
+        new FilterParameter(nameof(Model.VendorId)),
+        new FilterParameter(nameof(Model.WarehouseId)),
+        new FilterParameter(nameof(Model.BillingEmail)),
+        new FilterParameter(nameof(Model.BillingPhone)),
+        new FilterParameter(nameof(Model.BillingLastName)),
+        new FilterParameter(nameof(Model.BillingCountryId)),
+        new FilterParameter(nameof(Model.PaymentMethodSystemName)),
+        new FilterParameter(nameof(Model.ProductId)),
+        new FilterParameter(nameof(Model.OrderNotes))
+        }
+            };
+            gridModel.ColumnCollection = new List<ColumnProperty>
+        {
+        new ColumnProperty(nameof(OrderModel.Id))
+        {
+        IsMasterCheckBox = true,
+        Render = new RenderCheckBox("checkbox_orders"),
+        ClassName =  NopColumnClassDefaults.CenterAll,
+        Width = "50"
+        },
+        new ColumnProperty(nameof(OrderModel.CustomOrderNumber))
+        {
+        Title = "Custom Order Number",
+        Width = "80"
+        }
+        };
+            //a vendor does not have access to this functionality
+            if (!Model.IsLoggedInAsVendor)
+            {
+                gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.OrderStatus))
+                {
+                    Title = "Order Status",
+                    Width = "100",
+                    Render = new RenderCustom("renderColumnOrderStatus")
+                });
+            }
+            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.PaymentStatus))
+            {
+                Title = "Payment Status",
+                Width = "150"
+            });
+            //a vendor does not have access to this functionality
+            if (!Model.IsLoggedInAsVendor)
+            {
+                gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.ShippingStatus))
+                {
+                    Title ="Shipping Status",
+                    Width = "150"
+                });
+            }
+            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.CustomerEmail))
+            {
+                Title = "Customer",
+                Render = new RenderLink(new DataUrl("~/Admin/Customer/Edit", nameof(OrderModel.CustomerId)))
+            });
+
+        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.CardId))
+            {
+                Title = "Card ID",
+                Width = "150"
+            });
+
+        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.Date))
+            {
+                Title = "Date",
+                Width = "150"
+            });
+
+            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.FromTime))
+            {
+                Title = "From Time",
+                Width = "150"
+            });
+
+            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.StoreName))
+            {
+                Title = "Store",
+                Width = "100",
+                Visible = (await storeService.GetAllStoresAsync()).Count > 1
+            });
+            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.CreatedOn))
+            {
+                Title = "Created On",
+                Width = "120",
+                Render = new RenderDate()
+            });
+            //a vendor does not have access to this functionality
+            if (!Model.IsLoggedInAsVendor)
+            {
+                gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.OrderTotal))
+                {
+                    Title = "Order Total",
+                    Width = "100",
+                });
+            }
+            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(OrderModel.Id))
+            {
+                Title = "Edit",
+                Width = "50",
+                ClassName = NopColumnClassDefaults.Button,
+                Render = new RenderButtonView(new DataUrl("Edit"))
+            });
+            var orderSummaryColumnNumber = 8;
+        }
+
+        @await Html.PartialAsync("Table", gridModel)
+        
+    </div>

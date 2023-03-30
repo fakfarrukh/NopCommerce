@@ -1,0 +1,123 @@
+﻿
+@{
+    Layout = "~/Plugins/Misc.AppyTwoAppointment/Views/Shared/_DevExtremeLayout.cshtml";
+}
+@using DevExtreme.AspNet.Mvc
+@using Nop.Plugin.Misc.AppyTwoAppointment.Models.AppyAppointmentModel;
+
+@model List<VendorStaff>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div>
+
+    <div class="dx-field">
+        <div class="dx-field-label">Vendor</div>
+        <div class="dx-field-value">
+            @(Html.DevExtreme().SelectBox()
+                .DataSource(d => d.Mvc().Controller("VendorsStaffs").LoadAction("GetVendors").Key("Id"))
+                .DisplayExpr("Name")
+                .ValueExpr("Id")
+                .Value(1)
+                .OnValueChanged("selectBox_valueChanged")
+
+                )
+        </div>
+    </div>
+</div>
+
+@(
+Html.DevExtreme().DataGrid<VendorStaff>()
+    .ID("gridContainer")
+    .ShowBorders(true)
+    .Paging(paging => paging.Enabled(true))
+    .Editing(editing =>
+    {
+        editing.Mode(GridEditMode.Row);
+        editing.AllowAdding(true);
+        editing.AllowDeleting(true);
+        editing.AllowUpdating(true);
+        editing.UseIcons(true);
+    })
+    .Columns(columns =>
+        {
+           @* columns.AddFor(m => m.VendorId)
+
+            .Lookup(lookup => lookup
+                .DataSource(d => d.Mvc().Controller("VendorsStaffs").LoadAction("GetVendors").Key("Id"))
+                .DisplayExpr("Name")
+                .ValueExpr("Id")
+            );*@
+            columns.AddFor(m => m.ProductId)
+            .Caption("Clinic Name")
+            .Lookup(lookup => lookup
+                .DataSource(d => d.Mvc().Controller("VendorsStaffs").LoadAction("GetProducts").Key("Id"))
+                .DisplayExpr("Name")
+                .ValueExpr("Id")
+            );
+
+            columns.AddFor(m => m.Manage);
+
+        })
+
+        .DataSource(d => d.Mvc()
+        .Controller("VendorsStaffs")
+        .LoadAction("GetVendorStaffs")
+        .UpdateAction("Put")
+        .InsertAction("Post")
+        .DeleteAction("Delete")
+        .Key("Id")
+
+    )
+
+)
+
+<div id="events">
+    <div>
+
+        @(Html.DevExtreme().Button()
+            .ID("clear")
+            .Text("Clear")
+            .OnClick("onClearClick")
+            )
+    </div>
+    <ul></ul>
+</div>
+
+<script>
+    function logEvent(eventName) {
+        var logList = $("#events ul"),
+            newItem = $("<li>", { text: eventName });
+
+        logList.prepend(newItem);
+    }
+
+    function onFocusedRowChanged(e) {
+        const rowData = e.row && e.row.data;
+    }
+    function selectBox_valueChanged(data) {
+        var selectedItem = data.component.option('selectedItem');
+        
+        //alert(selectedItem.Name + " (ID: " + selectedItem.Id + ")");
+        //window.location.href = "/VendorsStaffs/selectBoxVendor/?id=" + selectedItem.Id
+        var id = selectedItem.Id;
+        jQuery.ajax({
+            type: "POST",
+            url: '/VendorsStaffs/selectBoxVendor/?id=' + selectedItem.Id,
+            dataType: "json",
+            contentType: "application/json",
+            data:{id: JSON.stringify( id )},
+            success: function (data) {
+                alert(id);
+            },
+            failure: function (errMsg) {
+                alert(errMsg);
+            }
+        });
+
+    }
+
+
+</script>

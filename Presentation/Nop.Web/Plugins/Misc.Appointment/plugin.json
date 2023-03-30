@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Misc",
+  "FriendlyName": "Appointment",
+  "SystemName": "Misc.Appointment",
+  "Version": "1.01",
+  "SupportedVersions": [ "4.50" ],
+  "Author": "Omid Kheiri",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Misc.Appointment.dll",
+  "Description": "This plugin allows to view  master and create edit detail of Appointment"
+}

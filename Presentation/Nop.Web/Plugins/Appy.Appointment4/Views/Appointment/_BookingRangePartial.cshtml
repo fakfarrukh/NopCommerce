@@ -1,0 +1,60 @@
+﻿@model Nop.Web.Areas.Admin.Models.Catalog.ProductModel
+@{
+}
+
+
+@(Html.DevExtreme().DataGrid<Nop.Plugin.Appy.Appointment4.Domain.aaProductRange>()
+    .ID("gridContainer").
+    DataSource(d => d.WebApi()
+                    .Controller("Appointment")
+                    .LoadAction("LoadAppointmentRanges").LoadParams(new { id = Model.Id })
+                    .InsertAction("InsertAppointmentRanges")
+                    .UpdateAction("UpdateAppointmentRanges")
+                    .DeleteAction("DeleteAppointmentRanges")
+                    .Key("Id")
+                )
+    .ShowBorders(true)
+    .Paging(paging => paging.Enabled(false))
+    .Editing(editing =>
+    {
+        editing.Mode(GridEditMode.Row);
+        editing.AllowAdding(true);
+        editing.AllowDeleting(true);
+        editing.AllowUpdating(true);
+    })
+    .Columns(columns =>
+    {
+        columns.AddFor(m => m.RowNumber).Caption("#").AllowEditing(false);
+        columns.AddFor(m => m.Saturday);
+
+        columns.AddFor(m => m.Sunday);
+
+        columns.AddFor(m => m.Monday);
+
+        columns.AddFor(m => m.Tuesday);
+        columns.AddFor(m => m.Wednesday);
+
+        columns.AddFor(m => m.Thurday);
+
+        columns.AddFor(m => m.Friday);
+
+        columns.AddFor(m => m.Bookable);
+        columns.AddFor(m => m.FromTime).Format("shortTime").EditorOptions(new { type = "time", displayFormat = "HH:mm", useMaskBehavior = true });
+        columns.AddFor(m => m.ToTime).Format("shortTime").EditorOptions(new { type = "time", displayFormat = "HH:mm", useMaskBehavior = true }); ;
+        columns.AddFor(m => m.Priority);
+    }).OnRowInserting("AddRangeBooking")
+)
+<script>
+    function AddRangeBooking(e) {
+        debugger;
+        console.log(e);
+
+        var data = e.data;
+        data.ProductId = $("#ProductId").val();
+
+
+    }
+    function rowNumber(cellElement, cellInfo) {
+        cellElement.text(cellInfo.row.rowIndex)
+    }
+</script>

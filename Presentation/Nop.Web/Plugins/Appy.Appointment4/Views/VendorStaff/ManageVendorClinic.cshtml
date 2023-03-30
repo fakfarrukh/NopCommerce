@@ -1,0 +1,264 @@
+﻿@model Nop.Plugin.Appy.Appointment4.Domain.aaVendorStaff;
+@{
+    Layout = "~/Plugins/Appy.Appointment4/Views/Shared/_PluginLayout.cshtml";
+}
+<style>
+    .row {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: calc(-1 * var(--bs-gutter-y));
+        margin-right: calc(-0.5 * var(--bs-gutter-x));
+        margin-left: calc(-0.5 * var(--bs-gutter-x));
+    }
+
+    .col {
+        flex: 1 0 0%;
+        position: relative;
+        width: 100%;
+        min-height: 1px;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+</style>
+<div class="row">
+
+    <div class="dx-field">
+        <div class="dx-field-label">Vendor</div>
+        <div class="dx-field-value">
+            @(Html.DevExtreme().SelectBox().DataSource(d => d.Mvc().Controller("aaVendor").LoadAction("LoadVendors")).DisplayExpr("Name").ValueExpr("Id")
+                .Placeholder("Choose Vendor").ID("ddlVendor").Name("Vendors").OnValueChanged("Vendor_valueChanged")
+                .ShowClearButton(true)
+                )
+        </div>
+    </div>
+</div>
+<br />
+<div class="row">
+    <div id="customerRelative">
+        @(
+            Html.DevExtreme().DataGrid<Nop.Plugin.Appy.Appointment4.Domain.aaVendorStaff>()
+            .ID("gridContainerVendorClinic").
+            DataSource(d => d.Mvc()
+            .Controller("VendorStaff")
+            .InsertAction("aaInsertVendorClinic")
+            .UpdateAction("aaUpdateVendorClinic")
+            .DeleteAction("aaDeleteVendorClinic")
+            .Key("Id")
+            )
+            .ShowBorders(true)
+            .Paging(paging => paging.Enabled(false))
+            .Editing(editing =>
+            {
+                editing.Mode(GridEditMode.Row);
+                editing.AllowAdding(true);
+                editing.AllowDeleting(true);
+                editing.AllowUpdating(true);
+
+            })
+            .Columns(columns =>
+            {
+                columns.AddFor(m => m.ClinicId).Caption("Clinic Name").DataType(GridColumnDataType.Number)
+                .Lookup(lookup => lookup.DisplayExpr("Name").ValueExpr("Id")
+
+                );
+                columns.AddFor(m => m.Manage)
+                .Width(125);
+
+            }).OnRowInserted("AddVendorStaff").OnRowUpdated("EditVendorStaff").OnRowRemoved("DeleteVendorStaff").OnContentReady("onContentReady").OnCellPrepared("onCellPrepared")
+
+
+            )
+    </div>
+</div>
+
+<script>
+    function onCellPrepared(e) {
+        // create a dropdown editor for the cell based on its column type
+        if (e.column.dataField === "ClinicId" && e.rowType === "data") {
+            createCategoryDropdownEditor(e);
+        }
+    }
+    function createCategoryDropdownEditor(e) {
+        console.log("test");
+        console.log(e);
+        //var editor = $("<div>").dxDropDownBox({
+        //    dataSource: e.column.lookup.dataSource,
+        //    displayExpr: "Name",
+        //    valueExpr: "Id",
+        //    value: e.value,
+        //    showClearButton: true,
+        //    onValueChanged: function (args) {
+        //        e.setValue(args.value);
+        //    }
+        //}).appendTo(e.cellElement);
+
+        //e.cellElement.dxClick(function (e) {
+        //    editor.dxDropDownBox("instance").open();
+        //});
+    }
+    function onContentReady(e) {
+        console.log(e);
+        if (e.component.columnOption("ClinicId")) {
+            console.log("Farrukh");
+            var VendorId = $("input[name=Vendors]").val();
+            console.log(VendorId);
+            $.ajax({
+                url: '/VendorStaff/LoadClinics/',
+                type: "get",
+                data: { Id: parseInt(VendorId) },
+                success: function (res) {
+                    console.log(res);
+                    var categoryColumn = e.component.columnOption("ClinicId");
+                    categoryColumn.lookup.dataSource = res;
+
+
+                },
+            });
+
+
+        }
+    }
+    function AddVendorStaff(e) {
+        debugger;
+        console.log(e);
+
+        var data = e.data;
+        data.VendorId = $("input[name=Vendors]").val();
+        $.ajax({
+            url: '/VendorStaff/aaInsertVendorClinic/',
+            type: "post",
+            data: { values: JSON.stringify(data) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    LoadVendorStaff(parseInt(data.VendorId));
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+
+    function EditVendorStaff(e) {
+        debugger;
+        console.log(e);
+
+        var data = e.data;
+        data.VendorId = $("input[name=Vendors]").val();
+        $.ajax({
+            url: '/VendorStaff/aaUpdateVendorClinic/',
+            type: "put",
+            data: { key: data.Id, values: JSON.stringify(data) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    console.log(data);
+                    LoadVendorStaff(parseInt(data.VendorId));
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+
+    function DeleteVendorStaff(e) {
+        debugger;
+        console.log(e);
+
+        var data = e.data;
+        data.VendorId = $("input[name=Vendors]").val();
+        $.ajax({
+            url: '/VendorStaff/aaDeleteVendorClinic/',
+            type: "DELETE",
+            data: { key: data.Id },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    LoadVendorStaff(data.VendorId);
+                }
+                else {
+
+                }
+
+            },
+        });
+    }
+
+
+    function Vendor_valueChanged(data) {
+        console.log(data.value);
+        LoadVendorStaff(data.value);
+    }
+
+    function LoadVendorStaff(Id) {
+        console.log(Id);
+        let element = document.getElementById("gridContainerVendorClinic");
+        console.log(element);
+        let instance = DevExpress.ui.dxDataGrid.getInstance(element);
+        instance.option("dataSource", [])
+        $.ajax({
+            url: '/VendorStaff/aaLoadVendorClinic/',
+            type: "get",
+            data: { Id: JSON.stringify(Id) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    if (res && res.length > 0) {
+                        instance.option("dataSource", res)
+                    }
+                    else {
+                        instance.option("dataSource", [])
+                    }
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+
+    $(document).ready(function () {
+        let element = document.getElementById("gridContainerVendorClinic");
+        console.log(element);
+        let instance = DevExpress.ui.dxDataGrid.getInstance(element);
+        instance.option("dataSource", [])
+
+    });
+</script>

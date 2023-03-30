@@ -1,0 +1,154 @@
+@model Nop.Web.Areas.Admin.Models.Vendors.VendorModel
+@{
+    Layout = "~/Plugins/Appy.Appointment4/Views/Shared/_PluginLayoutVendor.cshtml";
+}
+<style>
+    .dx-checkbox-app {
+        float: left !important;
+    }
+
+    .btn-appointment {
+        background-color: #5cb85c !important;
+        border-color: transparent !important;
+        color: #fff !important;
+    }
+
+    .dev-vendor-label {
+        width: 23%;
+        text-align: right;
+        font-weight: 600;
+    }
+
+    .dev-vendor-text {
+        width: 77% !important;
+    }
+</style>
+<div class="form-group row advanced-setting">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <div class="">Parent Vendor</div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="">
+            @(Html.DevExtreme().SelectBox()
+                .Placeholder("Choose Vendor")
+                .DataSource(d => d.Mvc().LoadAction("LoadVendors").RouteName("Plugin.Appointment4.aaVendor").LoadMode(DataSourceLoadMode.Raw)).DisplayExpr("Name").ValueExpr("Id")
+                .ShowClearButton(true).ID("ddlVendors").Name("VendorParentId")
+                )
+        </div>
+    </div>
+</div>
+<div class="form-group row advanced-setting">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <div class="">Latitude</div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="">
+            @(Html.DevExtreme().NumberBox().ID("Latitude").Name("VendorLatitude"))
+        </div>
+    </div>
+</div>
+<div class="form-group row advanced-setting">
+    <div class="col-md-3">
+        <div class="label-wrapper">
+            <div class="">Longitude</div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="">
+            @(Html.DevExtreme().NumberBox().ID("Longitude").Name("VendorLongitude"))
+        </div>
+    </div>
+    <input type="hidden" value="@Model.Id" id="aaVendorId" />
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        {
+            var VendorId = @Model.Id
+                $.ajax({
+                    url: '/aaVendor/LoadaaVendor/',
+                    type: "get",
+                    data: { VendorId: JSON.stringify(VendorId) },
+                    success: function (res) {
+                        if (res) {
+                            console.log(res);
+                            let displayelement = document.getElementById("ddlVendors");
+                            var eDisplay = DevExpress.ui.dxSelectBox.getInstance(displayelement)
+                            eDisplay.option('value', res.ParrentVendor);
+
+                            let VendorLongitudeelement = document.getElementById("Latitude");
+                            var eVendorLongitudeelement = DevExpress.ui.dxNumberBox.getInstance(VendorLongitudeelement)
+                            eVendorLongitudeelement.option('value', res.Longitude);
+
+
+                            let VendorLatitudeelement = document.getElementById("Longitude");
+                            var eVendorLatitudeelement = DevExpress.ui.dxNumberBox.getInstance(VendorLatitudeelement)
+                            eVendorLatitudeelement.option('value', res.Latitude);
+                        }
+                        else {
+                            //DevExpress.ui.notify(
+                            //    {
+                            //        message: "An Error has occurred",
+                            //        position: {
+                            //            my: "center top",
+                            //            at: "center top",
+                            //        },
+                            //    },
+                            //    "error",
+                            //    3500
+                            //);
+                        }
+
+                    },
+                });
+        }
+        $("form button[type=submit]").click(function () {
+
+            let displayelement = document.getElementById("ddlVendors");
+            var eDisplay = DevExpress.ui.dxSelectBox.getInstance(displayelement)
+
+            let VendorLongitudeelement = document.getElementById("Latitude");
+            var eVendorLongitudeelement = DevExpress.ui.dxNumberBox.getInstance(VendorLongitudeelement)
+
+
+            let VendorLatitudeelement = document.getElementById("Longitude");
+            var eVendorLatitudeelement = DevExpress.ui.dxNumberBox.getInstance(VendorLatitudeelement)
+
+            var aavendorData = {
+                ParrentVendor: eDisplay.option('value'), Longitude: eVendorLongitudeelement.option('value'),
+                Latitude: eVendorLatitudeelement.option('value'), VendoreId: parseInt($("#aaVendorId").val())
+            }
+            $.ajax({
+                url: '/aaVendor/AddUpdate/',
+                type: "post",
+                data: { model: JSON.stringify(aavendorData) },
+                success: function (res) {
+                    console.log(res);
+                    if (res) {
+
+                    }
+                    else {
+                        DevExpress.ui.notify(
+                            {
+                                message: "An Error has occurred",
+                                position: {
+                                    my: "center top",
+                                    at: "center top",
+                                },
+                            },
+                            "error",
+                            3500
+                        );
+                    }
+
+                },
+            });
+        });
+    })
+</script>

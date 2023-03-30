@@ -1,0 +1,221 @@
+﻿@model Nop.Plugin.Appy.Appointment4.Domain.aaCustomerRelative;
+@{
+    Layout = "~/Plugins/Appy.Appointment4/Views/Shared/_PluginLayout.cshtml";
+}
+<style>
+    .row {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: calc(-1 * var(--bs-gutter-y));
+        margin-right: calc(-0.5 * var(--bs-gutter-x));
+        margin-left: calc(-0.5 * var(--bs-gutter-x));
+    }
+
+    .col {
+        flex: 1 0 0%;
+        position: relative;
+        width: 100%;
+        min-height: 1px;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+</style>
+<div class="row">
+
+    <div class="dx-field">
+        <div class="dx-field-label">Logger Name</div>
+        <div class="dx-field-value">
+            @(Html.DevExtreme().SelectBox().DataSource(d => d.Mvc().LoadAction("GetCustomers")).DisplayExpr("SystemName").ValueExpr("Id").SearchMode(DropDownSearchMode.Contains).SearchEnabled(true)
+                .Placeholder("Choose customer").ID("ddlCustomer").Name("customers").OnValueChanged("customer_valueChanged")
+                .ShowClearButton(true)
+                )
+        </div>
+    </div>
+</div>
+<br />
+<div class="row">
+    <div id="customerRelative">
+        @(
+            Html.DevExtreme().DataGrid<Nop.Plugin.Appy.Appointment4.Domain.aaCustomerRelative>()
+            .ID("gridContainerRelative").
+            DataSource(d => d.Mvc()
+            .Controller("CustomerRelative")
+            .InsertAction("Insert")
+            .UpdateAction("Update")
+            .DeleteAction("Delete")
+            .Key("Id")
+            )
+            .ShowBorders(true)
+            .Paging(paging => paging.Enabled(true))
+            .Editing(editing =>
+            {
+                editing.Mode(GridEditMode.Row);
+                editing.AllowAdding(true);
+                editing.AllowDeleting(true);
+                editing.AllowUpdating(true);
+
+            })
+            .Columns(columns =>
+            {
+                columns.AddFor(m => m.CardId).Caption("Card ID");
+                columns.AddFor(m => m.CardType)
+                .Width(125)
+                .Lookup(lookup => lookup
+                .DataSource(d => d.Mvc().Controller("CustomerRelative").LoadAction("GetCardType"))
+
+                );
+                columns.AddFor(m => m.ArabicName).Caption("Arabic Name").Alignment(HorizontalAlignment.Right);
+                columns.AddFor(m => m.EnglishName).Caption("English Name");
+                columns.AddFor(m => m.BirthDate).Caption("Birth Date");
+            }).OnRowInserted("AddCustomerRelative").OnRowUpdated("EditCustomerRelative").OnRowRemoved("DeleteRelative")
+            )
+    </div>
+</div>
+
+<script>
+    function AddCustomerRelative(e) {
+        debugger;
+        console.log(e);
+        let element = document.getElementById("ddlCustomer");
+        console.log(element);
+        let instance = DevExpress.ui.dxSelectBox.getInstance(element);
+
+        console.log(instance.option("value"));
+        var data = e.data;
+        data.CustomerId = instance.option("value")
+        $.ajax({
+            url: '/CustomerRelative/Insert/',
+            type: "post",
+            data: { values: JSON.stringify(data) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    LoadCustomerRealtive(data.CustomerId)
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+    function EditCustomerRelative(e) {
+        debugger;
+        console.log(e);
+        let element = document.getElementById("ddlCustomer");
+        console.log(element);
+        let instance = DevExpress.ui.dxSelectBox.getInstance(element);
+
+        console.log(instance.option("value"));
+        var data = e.data;
+        data.CustomerId = instance.option("value")
+        $.ajax({
+            url: '/CustomerRelative/UpdateStaff/',
+            type: "put",
+            data: { Id: data.Id, values: JSON.stringify(data) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    LoadCustomerRealtive(data.CustomerId);
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+    function DeleteRelative(e) {
+        debugger;
+        console.log(e);
+        let element = document.getElementById("ddlCustomer");
+        console.log(element);
+        let instance = DevExpress.ui.dxSelectBox.getInstance(element);
+
+        console.log(instance.option("value"));
+        var data = e.data;
+        data.CustomerId = instance.option("value")
+        $.ajax({
+            url: '/CustomerRelative/DeleteStaff/',
+            type: "delete",
+            data: { Id: data.Id },
+            success: function (res) {
+                console.log(res);
+                LoadCustomerRealtive(data.CustomerId);            
+
+            },
+        });
+    }
+
+    function customer_valueChanged(data) {
+        console.log(data.value);
+        LoadCustomerRealtive(data.value);
+
+    }
+
+    function LoadCustomerRealtive(Id) {
+        $.ajax({
+            url: '/CustomerRelative/Load/',
+            type: "get",
+            data: { Id: JSON.stringify(Id) },
+            success: function (res) {
+                console.log(res);
+                if (res) {
+                    let element = document.getElementById("gridContainerRelative");
+                    console.log(element);
+                    let instance = DevExpress.ui.dxDataGrid.getInstance(element);
+                    if (res && res.length > 0) {
+                        instance.option("dataSource", res)
+                    }
+                    else {
+                        instance.option("dataSource", [])
+                    }
+                }
+                else {
+                    DevExpress.ui.notify(
+                        {
+                            message: "An Error has occurred",
+                            position: {
+                                my: "center top",
+                                at: "center top",
+                            },
+                        },
+                        "error",
+                        3500
+                    );
+                }
+
+            },
+        });
+    }
+
+    $(document).ready(function () {
+        let element = document.getElementById("gridContainerRelative");
+        console.log(element);
+        let instance = DevExpress.ui.dxDataGrid.getInstance(element);
+        instance.option("dataSource", [])
+
+    });
+</script>

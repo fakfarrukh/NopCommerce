@@ -1,0 +1,125 @@
+﻿@using Nop.Plugin.Misc.Appointment.Domain
+@await Html.PartialAsync("~/Plugins/Misc.Appointment/Views/_UiPartial.cshtml")
+@model Nop.Web.Areas.Admin.Models.Vendors.VendorModel
+
+<nop-card>
+  <div
+    class="card card-secondary card-outline advanced-setting"
+    data-card-name="vendor-products"
+    data-hideattribute="VendorPage.HideNotesBlock"
+    id="vendor-location"
+  >
+    <div class="card-header with-border clearfix">
+      <div class="card-title">
+        <i class="fas fa-th-list"> </i>Vendor Location
+      </div>
+      <div class="card-tools float-right">
+        <button class="btn btn-tool" data-card-widget="collapse" type="button">
+          <i class="fa toggle-icon fa-minus"> </i>
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div
+        id="vendornotes-grid_wrapper"
+        class="dataTables_wrapper dt-bootstrap4 no-footer"
+      >
+        <div class="row">
+            <div class="col-md-6">
+
+               @*  <form action="action" id="form-add-location">
+        <div id="vendoreLocation"></div>
+       
+      </form>*@
+     
+      <div class="dx-field">
+            <div class="dx-field-label">Latitude</div>
+            <div class="dx-field-value">
+              <div id="Latitude"></div>
+            </div>
+          </div>
+ <div class="dx-field">
+            <div class="dx-field-label">Longitude</div>
+            <div class="dx-field-value">
+              <div id="Longitude"></div>
+            </div>
+          </div>
+<div class="dx-field">
+            <div class="dx-field-label">ParrentVendor</div>
+            <div class="dx-field-value">
+              <div id="ParrentVendor"></div>
+            </div>
+          </div>
+<div class="dx-field">
+           <div id="button"></div>
+</div>
+<div id="summary"></div>
+<div> 
+
+</div>
+
+        </div>
+    <div class="col-md-6">
+
+
+
+        <div id="map"></div>
+
+        </div>    
+    
+    
+    
+    </div>
+      </div>
+    </div></div
+>
+</nop-card>
+
+
+
+
+<nop-card>
+  <div
+    class="card card-secondary card-outline advanced-setting"
+    data-card-name="vendor-products"
+    data-hideattribute="VendorPage.HideNotesBlock"
+    id="vendor-location"
+  >
+    <div class="card-header with-border clearfix">
+      <div class="card-title">
+        <i class="fas fa-th-list"> </i>Vendor Location
+      </div>
+      <div class="card-tools float-right">
+        <button class="btn btn-tool" data-card-widget="collapse" type="button">
+          <i class="fa toggle-icon fa-minus"> </i>
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div
+        id="vendornotes-grid_wrapper"
+        class="dataTables_wrapper dt-bootstrap4 no-footer"
+      >
+        <div class="row">
+            <div class="col-md-12">
+<div id="dataGridInsurance"></div>
+
+<div> 
+
+</div>
+
+        </div>
+    
+    
+    
+    
+    </div>
+      </div>
+    </div>
+    
+    
+    
+    </div
+>
+</nop-card>
+
